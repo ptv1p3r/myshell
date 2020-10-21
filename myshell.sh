@@ -1,12 +1,14 @@
 #!/bin/bash
+EXIT_SHELL=false
 
-printf "myshell> "
+#printf "myshell> "
 
 # get commands
-read commands #reads full line
-read -r command options <<< "$commands" #IFS slipt commands
+#read commands #reads full line
+#read -r command options <<< "$commands" #IFS slipt commands
 #echo $command
 #echo $options
+
 
 # display freespace of device
 getFreespace(){
@@ -29,12 +31,40 @@ getFilePermissions(){
 	ls -ld $1 | awk '{ print $1; }'
 }
 
-case $command in
-	pid)	getPid	$options;;	
-	freespace) getFreespace ;;
-	help) getHelp ;;
-	permissions) getFilePermissions $options;;
-	exit) printf "ISMAT SO 2020 Pedro Roldan shell exit\n" ; exit ;
-esac
 
+# moves file to destination and makes bakcup
+moveFileWithBackup(){
+	#echo $1
+	#echo $2
+	filename="${1##*/}" 
+	extension="${filename##*.}"
+	#extension=$([[ "$filename" = *.* ]] && echo ".${filename##*.}" || echo '')
+	filename="${filename%.*}"
+	echo $filename
+	echo $extension
+}
+
+# executes normal bash commands
+executeBash(){
+	$1 $2
+	EXIT_SHELL=true	
+}
+
+#control structure
+until [ "$EXIT_SHELL" = true ]; do
+	printf "myshell> "
+
+	read commands #reads full line
+	read -r command options <<< "$commands" #IFS slipt commands
+	
+	case $command in
+		pid) getPid	$options;;	
+		freespace) getFreespace ;;
+		help) getHelp ;;
+		permissions) getFilePermissions $options;;
+		bakmove) moveFileWithBackup $options;;
+		exit) printf "ISMAT SO 2020 Pedro Roldan shell exit\n"; exit;;
+		*) executeBash $command $options;;
+	esac
+done
 
