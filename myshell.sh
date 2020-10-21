@@ -24,11 +24,17 @@ getHelp(){
 	echo "Ajuda"
 }
 
+# display file permissions
+getFilePermissions(){
+	ls -ld $1 | awk '{ print $1; }'
+}
+
 case $command in
 	pid)	getPid	$options;;	
 	freespace) getFreespace ;;
 	help) getHelp ;;
-	exit) printf "Pedro Roldan shell exit\n" ; exit ;
+	permissions) getFilePermissions $options;;
+	exit) printf "ISMAT SO 2020 Pedro Roldan shell exit\n" ; exit ;
 esac
 
 
