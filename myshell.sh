@@ -13,6 +13,7 @@ getPid(){
 	if [ ! -z "$1" ]
 	then
 		echo "${1^}'s PID" # bash 4+ capitalize first letter
+		# list all processes, filter by process print argument using awk
 		ps aux | grep $1 | awk '{print $2}'	
 	else
 		printf "Missing command parameters, check help!\n"
@@ -41,7 +42,7 @@ getFilePermissions(){
 }
 
 
-# moves file to destination and makes bakcup
+# moves file to destination and makes backup
 moveFileWithBackup(){
 	if [ ! -z "$1" ] && [ ! -z "$2" ] # $1 $2 not empty
 	then
@@ -58,16 +59,18 @@ moveFileWithBackup(){
 
 		# check if directory exists if not create
 		[ ! -d "$2" ] && mkdir -p "$2"
-	
-		# create backup of file
-		cp $1 $basedir"/$filename.bak"
-		if [ $? -eq 0 ] # check if cp is successfull =0 error =1
+		if [ $? -eq 0 ] # check command is successfull =0 error =1
 		then
-			printf "Backup created in $basedir/$filename.bak\n"
-		fi
+			# create backup of file
+			cp $1 $basedir"/$filename.bak"
+			if [ $? -eq 0 ] # check command is successfull =0 error =1
+			then
+				printf "Backup created in $basedir/$filename.bak\n"
+			fi
 
-		# move file to destination
-		mv $1 $2	
+			# move file to destination
+			mv $1 $2	
+		fi
 	else
 		printf "Missing command parameters, check help!\n"	
 	fi
@@ -95,18 +98,22 @@ until [ "$EXIT_SHELL" = true ]; do
 
 	# get commands
 	read commands #reads full line
-	read -r command options <<< "$commands" #IFS slipt commands
-	#echo $command
-	#echo $options
-	
-	case $command in
-		pid) getPid	$options;;	
-		freespace) getFreespace;;
-		help) getHelp;;
-		permissions) getFilePermissions $options;;
-		bakmove) moveFileWithBackup $options;;
-		exit) exitBash;;
-		*) executeBash $command $options;;
-	esac
+
+	if [ ! -z "$commands" ] # commands not empty
+	then
+		read -r command options <<< "$commands" #IFS slipt commands
+		#echo $command
+		#echo $options
+		
+		case $command in
+			pid) getPid	$options;;	
+			freespace) getFreespace;;
+			help) getHelp;;
+			permissions) getFilePermissions $options;;
+			bakmove) moveFileWithBackup $options;;
+			exit) exitBash;;
+			*) executeBash $command $options;;
+		esac 
+	fi
 done
 
