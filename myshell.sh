@@ -18,8 +18,8 @@ getHelp(){
 	printf "MyShell Help Commands 1.0\n"
 	printf 	"pid\tGet process PID ex:pid firefox\n"
 	printf	"freespace\tDisplay device used space\n"
-	printf	"permissions\tDisplay file permissions\n"
-	printf	"bakmove\tMove file and create backup\n"
+	printf	"permissions\tDisplay file permissions ex: permissions path_to_filename\n"
+	printf	"bakmove\tMove file and create backup ex: bakmove path_to_file path_to_foldern\n"
 	printf	"exit\tExit myshell\n"
 }
 
@@ -33,12 +33,22 @@ getFilePermissions(){
 moveFileWithBackup(){
 	#echo $1
 	#echo $2
-	filename="${1##*/}" 
-	extension="${filename##*.}"
+	
+	# parameter extension
+	filename="${1##*/}" # get file at last /
+	extension="${filename##*.}" # get extension
 	#extension=$([[ "$filename" = *.* ]] && echo ".${filename##*.}" || echo '')
 	filename="${filename%.*}"
+	
 	echo $filename
 	echo $extension
+
+	# check if directory exists if not create
+	[ ! -d "$2" ] && mkdir -p "$2"
+
+	# create backup of file
+	# move file to destination
+	#mv $1 $2
 }
 
 # executes normal bash commands
@@ -69,7 +79,6 @@ until [ "$EXIT_SHELL" = true ]; do
 		help) getHelp;;
 		permissions) getFilePermissions $options;;
 		bakmove) moveFileWithBackup $options;;
-		#exit) printf "ISMAT SO 2020 Pedro Roldan shell exit\n"; exit;;
 		exit) exitBash;;
 		*) executeBash $command $options;;
 	esac
