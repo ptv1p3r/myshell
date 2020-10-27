@@ -9,8 +9,14 @@ getFreespace(){
 
 # display pid of process in ascending order
 getPid(){
-	echo "${1^}'s PID" # bash 4+ capitalize first letter
-	ps aux | grep $1 | awk '{print $2}'
+	# check for missing commands
+	if [ ! -z "$1" ]
+	then
+		echo "${1^}'s PID" # bash 4+ capitalize first letter
+		ps aux | grep $1 | awk '{print $2}'	
+	else
+		printf "Missing command parameters, check help!\n"
+	fi 
 }
 
 # display help for the shell
@@ -20,42 +26,51 @@ getHelp(){
 	printf	"freespace\tDisplay device used space\n"
 	printf	"permissions\tDisplay file permissions ex: permissions path_to_filename\n"
 	printf	"bakmove\tMove file and create backup ex: bakmove path_to_file path_to_foldern\n"
+	printf	"bash command\tAll bash commands allowed\n"
 	printf	"exit\tExit myshell\n"
 }
 
 # display file permissions
 getFilePermissions(){
-	ls -ld $1 | awk '{print $1;}'
+	if [ ! -z "$1" ] # $1 not empty
+	then 
+		ls -ld $1 | awk '{print $1}'
+	else
+		printf "Missing command parameters, check help!\n"
+	fi
 }
 
 
 # moves file to destination and makes bakcup
 moveFileWithBackup(){
-	basedir="$(dirname "${1}")" # get dir from path (POSIX standard)
-	file="$(basename "${1}")" # get file from path (POSIX standard)
+	if [ ! -z "$1" ] && [ ! -z "$2" ] # $1 $2 not empty
+	then
+		basedir="$(dirname "${1}")" # get dir from path (POSIX standard)
+		file="$(basename "${1}")" # get file from path (POSIX standard)
 
-	# parameter extension
-	filename="${1##*/}" # get file at last /
-	extension="${filename##*.}" # get extension
-	#extension=$([[ "$filename" = *.* ]] && echo ".${filename##*.}" || echo '')
-	filename="${filename%.*}"
+		# parameter extension
+		filename="${1##*/}" # get file at last /
+		extension="${filename##*.}" # get extension
+		filename="${filename%.*}"
 	
-	#echo $filename
-	#echo $extension 
+		#echo $filename
+		#echo $extension 
 
-	# check for destination dir
-	if [ ! -z "$2" ] 
-	then 
 		# check if directory exists if not create
 		[ ! -d "$2" ] && mkdir -p "$2"
-	fi
 	
-	# create backup of file
-	cp $1 $basedir"/$filename.bak"
-	printf "Backup created in $basedir/$filename.bak\n"
+		# create backup of file
+		cp $1 $basedir"/$filename.bak"
+		if [ $? -eq 0 ] # check if cp is successfull =0 error =1
+		then
+			printf "Backup created in $basedir/$filename.bak\n"
+		fi
 
-	# move file to destination
-	mv $1 $2
+		# move file to destination
+		mv $1 $2	
+	else
+		printf "Missing command parameters, check help!\n"	
+	fi
 }
 
 # executes normal bash commands
