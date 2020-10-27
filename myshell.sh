@@ -31,29 +31,40 @@ getFilePermissions(){
 
 # moves file to destination and makes bakcup
 moveFileWithBackup(){
-	#echo $1
-	#echo $2
-	
+	basedir="$(dirname "${1}")" # get dir from path (POSIX standard)
+	file="$(basename "${1}")" # get file from path (POSIX standard)
+
 	# parameter extension
 	filename="${1##*/}" # get file at last /
 	extension="${filename##*.}" # get extension
 	#extension=$([[ "$filename" = *.* ]] && echo ".${filename##*.}" || echo '')
 	filename="${filename%.*}"
 	
-	echo $filename
-	echo $extension
+	#echo $filename
+	#echo $extension 
 
-	# check if directory exists if not create
-	[ ! -d "$2" ] && mkdir -p "$2"
-
+	# check for destination dir
+	if [ ! -z "$2" ] 
+	then 
+		# check if directory exists if not create
+		[ ! -d "$2" ] && mkdir -p "$2"
+	fi
+	
 	# create backup of file
+	cp $1 $basedir"/$filename.bak"
+	printf "Backup created in $basedir/$filename.bak\n"
+
 	# move file to destination
-	#mv $1 $2
+	mv $1 $2
 }
 
 # executes normal bash commands
 executeBash(){
-	$1 $2	
+	# command not empty
+	if [ ! -z "$1" ] 
+	then 
+		$1 $2
+	fi
 }
 
 # exit myshell
